@@ -32,9 +32,10 @@ PDF_PATH=/caminho/para/seu/documento.pdf
 PGVECTOR_COLLECTION=document_embeddings
 PGVECTOR_URL=postgresql://postgres:postgres@localhost:5432/rag
 
-# OpenAI Configuration (necessária para embeddings)
+# OpenAI Configuration (necessária para embeddings e LLM)
 OPENAI_API_KEY=sua_chave_api_openai_aqui
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+OPENAI_MODEL=gpt-3.5-turbo
 ```
 
 ### 4. Estrutura do Banco de Dados
@@ -47,6 +48,35 @@ CREATE TABLE document_embeddings (
     metadata JSONB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+```
+
+### 5. Testando o Sistema de Busca
+
+#### Primeiro, execute a ingestão:
+```bash
+python src/ingest.py
+```
+
+#### Depois, teste a busca:
+```bash
+python src/chat.py
+```
+
+#### Exemplo de saída esperada:
+```
+=== Chat Interativo - Busca Vetorial ===
+Digite sua pergunta (ou 'sair' para encerrar):
+
+Você: Qual é o conteúdo do documento?
+
+Processando...
+
+Resposta: Com base no contexto fornecido, o documento contém informações sobre [resposta gerada pelo LLM baseada no conteúdo encontrado nos documentos].
+
+==================================================
+
+Você: sair
+Encerrando chat...
 ```
 
 ---
@@ -109,45 +139,104 @@ Documentos enriquecidos: 67
 ## 🔍 search.py - Sistema de Busca Semântica
 
 ### 📋 Status Atual
-🚧 **Em Desenvolvimento**
+✅ **Implementado**
 
-### 🎯 Funcionalidades Planejadas
-- [ ] Busca semântica nos embeddings armazenados
-- [ ] Retrieval de documentos relevantes baseado na query
-- [ ] Sistema de ranking de relevância
-- [ ] Filtros por metadados
+### 🎯 Funcionalidades Implementadas
+- ✅ **Busca semântica nos embeddings armazenados** - Usando PGVector com similarity_search_with_score
+- ✅ **Retrieval de documentos relevantes** - Baseado na pergunta do usuário
+- ✅ **Separação de responsabilidades** - Busca em search.py, LLM em chat.py
+- ✅ **Configuração automática do store PGVector** - Conexão com PostgreSQL
+- ✅ **Template de prompt estruturado** - Para respostas baseadas em contexto
+- ✅ **Tratamento de erros robusto** - Fallbacks sem logs desnecessários
+- ✅ **Interface limpa** - Apenas prints essenciais para navegação
 
-### 📝 Implementação Atual
-O arquivo contém um template de prompt para respostas baseadas em contexto, mas a funcionalidade de busca ainda não foi implementada.
+### 🏃‍♂️ Como Usar
 
-### 🔄 Próximos Passos
-- Implementar busca vetorial usando PGVector
-- Configurar retriever com LangChain
-- Adicionar sistema de scoring de relevância
-- Integrar com o sistema de chat
+#### Função de Busca: `search_prompt(question)`
+```python
+from search import search_prompt
+
+# Buscar contexto e formatar prompt
+formatted_prompt = search_prompt("Qual é o conteúdo do documento?")
+print(formatted_prompt)  # Prompt formatado pronto para LLM
+```
+
+#### Função de Resposta: `generate_response_with_llm(question)`
+```python
+from chat import generate_response_with_llm
+
+# Buscar contexto e gerar resposta final com LLM
+resposta = generate_response_with_llm("Qual é o conteúdo do documento?")
+print(resposta)  # Resposta final formatada
+```
+
+#### Exemplo de uso no chat:
+```python
+# No chat interativo, a função já está integrada
+from chat import interactive_chat
+interactive_chat()
+```
+
+### 📊 Características Técnicas
+- **Embeddings**: OpenAI text-embedding-3-small
+- **Busca**: PGVector similarity_search_with_score
+- **Configuração**: Variáveis de ambiente (PGVECTOR_URL, PGVECTOR_COLLECTION)
+- **Retorno**: Prompt formatado pronto para LLM
+- **Responsabilidade**: Apenas busca e formatação de contexto
 
 ---
 
 ## 💬 chat.py - Interface de Chat RAG
 
 ### 📋 Status Atual
-🚧 **Em Desenvolvimento**
+✅ **Implementado**
 
-### 🎯 Funcionalidades Planejadas
-- [ ] Interface interativa de chat
-- [ ] Integração com sistema de busca
-- [ ] Geração de respostas usando LLM
-- [ ] Histórico de conversas
-- [ ] Tratamento de erros e validações
+### 🎯 Funcionalidades Implementadas
+- ✅ **Chat interativo completo** - Para testes em tempo real
+- ✅ **Integração com OpenAI LLM** - Usa generate_response_with_llm
+- ✅ **Geração de respostas inteligentes** - Baseadas no contexto dos documentos
+- ✅ **Tratamento de erros** - Validação de entrada e fallbacks
+- ✅ **Interface limpa** - Apenas mensagens essenciais para navegação
+- ✅ **Separação de responsabilidades** - LLM isolado do sistema de busca
 
-### 📝 Implementação Atual
-O arquivo possui a estrutura básica para inicializar o chat, mas ainda não implementa a interface completa.
+### 🏃‍♂️ Como Usar
+
+#### Execução Direta
+```bash
+# Executar chat interativo
+python src/chat.py
+```
+
+#### Uso Programático
+```python
+# Importar e usar diretamente
+from chat import interactive_chat
+interactive_chat()
+
+# Ou usar apenas a função de geração de resposta
+from chat import generate_response_with_llm
+resultado = generate_response_with_llm("Sua pergunta aqui")
+print(resultado)
+```
+
+### 📝 Funcionalidades Disponíveis
+
+1. **`interactive_chat()`** - Chat interativo completo para testes
+2. **`generate_response_with_llm(question)`** - Geração de resposta com LLM
+3. **Integração com search.py** - Busca + LLM + resposta final
+4. **Respostas inteligentes** - Baseadas no contexto dos documentos
+
+### 📊 Características Técnicas
+- **LLM**: OpenAI GPT-3.5-turbo (configurável via OPENAI_MODEL)
+- **Configuração**: Variáveis de ambiente (OPENAI_MODEL)
+- **Responsabilidade**: Execução do LLM e interface de chat
+- **Integração**: Usa search_prompt do search.py
 
 ### 🔄 Próximos Passos
-- Implementar loop de conversação
-- Integrar com search.py para retrieval
-- Adicionar geração de respostas com LLM
-- Criar interface de usuário amigável
+- [ ] Adicionar histórico de conversas
+- [ ] Implementar interface web
+- [ ] Adicionar filtros por metadados
+- [ ] Configurar diferentes modelos de LLM
 
 ---
 
