@@ -138,9 +138,6 @@ Documentos enriquecidos: 67
 
 ## 🔍 search.py - Sistema de Busca Semântica
 
-### 📋 Status Atual
-✅ **Implementado**
-
 ### 🎯 Funcionalidades Implementadas
 - ✅ **Busca semântica nos embeddings armazenados** - Usando PGVector com similarity_search_with_score
 - ✅ **Retrieval de documentos relevantes** - Baseado na pergunta do usuário
@@ -188,9 +185,6 @@ interactive_chat()
 
 ## 💬 chat.py - Interface de Chat RAG
 
-### 📋 Status Atual
-✅ **Implementado**
-
 ### 🎯 Funcionalidades Implementadas
 - ✅ **Chat interativo completo** - Para testes em tempo real
 - ✅ **Integração com OpenAI LLM** - Usa generate_response_with_llm
@@ -227,16 +221,10 @@ print(resultado)
 4. **Respostas inteligentes** - Baseadas no contexto dos documentos
 
 ### 📊 Características Técnicas
-- **LLM**: OpenAI GPT-3.5-turbo (configurável via OPENAI_MODEL)
+- **LLM**: OpenAI gpt-5-nano (configurável via OPENAI_MODEL)
 - **Configuração**: Variáveis de ambiente (OPENAI_MODEL)
 - **Responsabilidade**: Execução do LLM e interface de chat
 - **Integração**: Usa search_prompt do search.py
-
-### 🔄 Próximos Passos
-- [ ] Adicionar histórico de conversas
-- [ ] Implementar interface web
-- [ ] Adicionar filtros por metadados
-- [ ] Configurar diferentes modelos de LLM
 
 ---
 
