@@ -6,7 +6,7 @@ from search import search_prompt
 load_dotenv()
 
 # Configurações do LLM
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5-nano")
 
 def generate_response_with_llm(question):
     """Gera resposta final usando OpenAI LLM"""
